@@ -18,32 +18,13 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-				.formLogin(form -> form
-						.loginPage("/loginPage")
-						.loginPage("/loginProc")
-						.defaultSuccessUrl("/", true)
-						.failureUrl("/failed")
-						.usernameParameter("userId")
-						.passwordParameter("passwd")
-
-						// 얘네가 defaultSuccessUrl 이거보다 더 우선시 됨.
-						.successHandler((request, response, authentication) -> {
-							System.out.println("authentication : " + authentication);
-							response.sendRedirect("/home");
-						})
-						.failureHandler((request, response, exception) -> {
-							System.out.println("exception : " + exception);
-							response.sendRedirect("/loginPage");
-						})
-						.permitAll()
-				);
-
+				.httpBasic(basic -> basic.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		return http.build();
 	}
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		UserDetails user = User.withUsername("name").password("{noop}1111").roles("USER").build();
+		UserDetails user = User.withUsername("user").password("{noop}1111").roles("USER").build();
 		return new InMemoryUserDetailsManager(user);
 	}
 }
